@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#071629">
+<title>Support Pro</title>
+<link rel="stylesheet" href="style.css">
+
+<style>
+[hidden] { display:none !important; }
+
+body {
+  background:#071629;
+  color:white;
+  font-family:Arial,sans-serif;
+}
+
+.main-container {
+  width:min(100% - 28px,850px);
+  margin:25px auto;
+}
+
+.top-header {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  margin-bottom:25px;
+}
+
+.top-header h1 { font-size:27px; }
+
+.mail-logo {
+  width:55px;
+  height:55px;
+  filter:drop-shadow(0 0 12px #19bfff);
+}
+
+.panel {
+  background:#10243b;
+  border:1px solid #24527a;
+  border-radius:16px;
+  padding:20px;
+  margin-bottom:18px;
+  box-shadow:0 8px 25px #0003;
+}
+
+input,textarea,select {
+  box-sizing:border-box;
+  width:100%;
+  padding:12px;
+  margin:7px 0 13px;
+  border:1px solid #355c7d;
+  border-radius:9px;
+  background:#081a2e;
+  color:white;
+  font-size:15px;
+}
+
+textarea { min-height:110px; }
+
+button {
+  border:0;
+  border-radius:9px;
+  padding:11px 15px;
+  background:#147bd1;
+  color:white;
+  font-size:14px;
+  font-weight:bold;
+  cursor:pointer;
+  margin:4px 2px;
+}
+
+button:disabled { opacity:.45; }
+button.secondary { background:#29445f; }
+
+.auth-tabs,.view-tabs,.filter-tabs {
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap;
+  margin:12px 0;
+}
+
+.auth-tabs button.active,
+.view-tabs button.active,
+.filter-tabs button.active {
+  background:#19a9ef;
+}
+
+.password-wrap { position:relative; }
+.password-wrap input { padding-right:75px; }
+
+.password-toggle {
+  position:absolute;
+  right:5px;
+  top:10px;
+  padding:8px;
+  background:transparent;
+  color:#74d8ff;
+}
+
+.dashboard-stats {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+  margin-top:18px;
+}
+
+.stat-card {
+  background:linear-gradient(145deg,#173858,#0b1c32);
+  border:1px solid #247dc0;
+  border-radius:14px;
+  padding:15px 5px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
+  text-align:center;
+  min-width:0;
+}
+
+.stat-icon { font-size:23px; }
+.stat-card strong { font-size:27px;color:#65d9ff; }
+.stat-card span:last-child { font-size:12px; }
+
+.notification-area {
+  position:relative;
+  display:flex;
+  justify-content:flex-end;
+  margin:12px 0;
+}
+
+.notification-button {
+  position:relative;
+  background:#173858;
+  border:1px solid #278bd0;
+  font-size:21px;
+  min-width:48px;
+}
+
+#notificationBadge {
+  position:absolute;
+  top:-7px;
+  right:-7px;
+  min-width:19px;
+  height:19px;
+  padding:1px 4px;
+  border-radius:20px;
+  background:#f04455;
+  color:white;
+  font-size:11px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.notification-panel {
+  position:absolute;
+  top:52px;
+  right:0;
+  z-index:1000;
+  width:min(320px,calc(100vw - 55px));
+  max-height:350px;
+  overflow-y:auto;
+  padding:14px;
+  background:#10243b;
+  border:1px solid #278bd0;
+  border-radius:12px;
+  box-shadow:0 10px 30px #0009;
+}
+
+#notificationPanel:not([hidden]) {
+  display:block !important;
+}
+
+.notification-item {
+  display:block;
+  width:100%;
+  text-align:left;
+  background:#183650;
+  margin:7px 0;
+  padding:12px;
+  white-space:normal;
+}
+
+.notification-item.unread {
+  border-left:4px solid #36c7ff;
+}
+
+.message-item,.sent-item {
+  background:#142e49;
+  border:1px solid #2a5274;
+  border-radius:11px;
+  padding:13px;
+  margin:10px 0;
+}
+
+.message-item p,.sent-item p { margin:6px 0; }
+.message-item.unread { border-left:4px solid #36c7ff; }
+
+.sent-actions {
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:10px;
+}
+
+.delete-demo-button { background:#9f303b; }
+
+.profile-preview {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin:12px 0;
+}
+
+#profileLogo,#logoPreview {
+  width:55px;
+  height:55px;
+  border-radius:12px;
+  object-fit:cover;
+  background:#193b59;
+}
+
+.muted { color:#a9c2d8;font-size:13px; }
+.message-text { white-space:pre-wrap;line-height:1.5; }
+.status-message { color:#76d9ff;min-height:18px; }
+
+@media(max-width:360px) {
+  .dashboard-stats { gap:5px; }
+  .stat-card { padding:12px 3px; }
+  .stat-card strong { font-size:22px; }
+}
+</style>
+</head>
+
+<body>
+<div class="main-container">
+
+<header class="top-header">
+  <svg class="mail-logo" viewBox="0 0 100 100" aria-label="Support Pro">
+    <defs>
+      <linearGradient id="mailGradient" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#75edff"/>
+        <stop offset="100%" stop-color="#0875df"/>
+      </linearGradient>
+    </defs>
+    <rect x="8" y="19" width="84" height="62" rx="13"
+      fill="url(#mailGradient)" stroke="#a9f4ff" stroke-width="3"/>
+    <path d="M12 28 L50 57 L88 28" fill="none"
+      stroke="#e8fbff" stroke-width="6" stroke-linecap="round"/>
+    <path d="M12 75 L39 51 M88 75 L61 51" fill="none"
+      stroke="#b7f4ff" stroke-width="4" stroke-linecap="round"/>
+  </svg>
+  <h1>Support Pro</h1>
+</header>
+
+<div style="text-align:right;margin-bottom:15px">
+  <select id="languageSelect" aria-label="Language" style="width:auto">
+    <option value="en">English</option>
+    <option value="fr">Français</option>
+    <option value="ar">العربية</option>
+  </select>
+</div>
+
+<section id="authCard" class="panel">
+  <h2 id="authTitle">Welcome to Support Pro</h2>
+  <p id="authDescription">Sign in or create your business account.</p>
+
+  <div class="auth-tabs">
+    <button id="showLogin" class="active" type="button">Login</button>
+    <button id="showSignup" type="button">Sign up</button>
+  </div>
+
+  <form id="authForm">
+    <label for="authEmail">Email</label>
+    <input id="authEmail" type="email" required autocomplete="email">
+
+    <label for="authPassword">Password</label>
+    <div class="password-wrap">
+      <input id="authPassword" type="password" required autocomplete="current-password">
+      <button class="password-toggle" type="button" data-target="authPassword">Show</button>
+    </div>
+
+    <div id="confirmPasswordGroup" hidden>
+      <label for="confirmPassword">Confirm password</label>
+      <div class="password-wrap">
+        <input id="confirmPassword" type="password" autocomplete="new-password">
+        <button class="password-toggle" type="button" data-target="confirmPassword">Show</button>
+      </div>
+    </div>
+
+    <button id="authSubmit" type="submit">Login</button>
+    <p id="authMessage" class="status-message" aria-live="polite"></p>
+  </form>
+</section>
+
+<main id="appArea" hidden>
+
+<section class="panel">
+  <div class="profile-preview">
+    <img id="profileLogo" alt="Company logo" hidden>
+    <span id="profileDefaultLogo" style="font-size:32px">🏢</span>
+    <div>
+      <h2 id="profileCompanyName">My Company</h2>
+      <p id="profileBusinessEmail" class="muted"></p>
+    </div>
+  </div>
+  <p>Welcome, <span id="signedInEmail"></span></p>
+  <button id="logoutButton" class="secondary" type="button">Log out</button>
+</section>
+
+<section class="panel">
+  <h2>Company Profile</h2>
+  <label for="companyName">Company name</label>
+  <input id="companyName" type="text" placeholder="Your company name">
+
+  <label for="businessEmail">Business email</label>
+  <input id="businessEmail" type="email" placeholder="business@example.com">
+
+  <label for="logoFile">Company logo</label>
+  <input id="logoFile" type="file" accept="image/*">
+  <img id="logoPreview" alt="Logo preview" hidden>
+
+  <button id="save" type="button">Save profile</button>
+  <p id="profileMessage" class="status-message" aria-live="polite"></p>
+</section>
+
+<section id="dashboard" class="panel">
+  <h2>Dashboard</h2>
+
+  <div class="notification-area">
+    <button id="notificationButton" class="notification-button"
+      type="button" aria-expanded="false"
+      aria-controls="notificationPanel" aria-label="Notifications">
+      🔔
+      <span id="notificationBadge" hidden>0</span>
+    </button>
+
+    <div id="notificationPanel" class="notification-panel" hidden>
+      <h3>Notifications</h3>
+      <div id="notificationList"></div>
+      <p id="noNotifications" class="muted">No new notifications.</p>
+    </div>
+  </div>
+
+  <div class="dashboard-stats">
+    <div class="stat-card">
+      <span class="stat-icon">📥</span>
+      <strong id="totalReceived">3</strong>
+      <span>Received</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">🔵</span>
+      <strong id="totalUnread">2</strong>
+      <span>Unread</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">📤</span>
+      <strong id="totalSent">0</strong>
+      <span>Sent</span>
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>Connect your mailbox</h2>
+  <p class="muted">Real mailbox connections will be added later.</p>
+  <button type="button" disabled>Gmail</button>
+  <button type="button" disabled>Outlook</button>
+  <button type="button" disabled>Other email</button>
+</section>
+
+<section class="panel">
+  <div class="view-tabs">
+    <button id="inboxTab" class="active" type="button">Inbox</button>
+    <button id="sentTab" type="button">Sent</button>
+  </div>
+
+  <div id="inboxView">
+    <h2>Inbox</h2>
+    <input id="messageSearch" type="search" placeholder="Search messages...">
+
+    <div class="filter-tabs">
+      <button class="status-filter active" data-filter="all" type="button">All</button>
+      <button class="status-filter" data-filter="unread" type="button">Unread</button>
+      <button class="status-filter" data-filter="read" type="button">Read</button>
+    </div>
+
+    <p id="messageCount" class="muted">3 messages</p>
+
+    <div id="messageList">
+      <article class="message-item unread" data-status="unread">
+        <p><strong>Ahmed Mohamed</strong></p>
+        <p class="muted">ahmed@example.com</p>
+        <p>Question about your services</p>
+        <button class="read-message" type="button"
+          data-sender="Ahmed Mohamed"
+          data-email="ahmed@example.com"
+          data-subject="Question about your services"
+          data-body="Hello, I would like to know more about your services. Thank you.">
+          Open message
+        </button>
+      </article>
+
+      <article class="message-item unread" data-status="unread">
+        <p><strong>Sarah Ali</strong></p>
+        <p class="muted">sarah@example.com</p>
+        <p>Request for a quotation</p>
+        <button class="read-message" type="button"
+          data-sender="Sarah Ali"
+          data-email="sarah@example.com"
+          data-subject="Request for a quotation"
+          data-body="Hello, could you please send me a quotation for your services?">
+          Open message
+        </button>
+      </article>
+
+      <article class="message-item" data-status="read">
+        <p><strong>Mohamed Khaled</strong></p>
+        <p class="muted">mohamed@example.com</p>
+        <p>Thank you for your support</p>
+        <button class="read-message" type="button"
+          data-sender="Mohamed Khaled"
+          data-email="mohamed@example.com"
+          data-subject="Thank you for your support"
+          data-body="Thank you for your help. I appreciate your support.">
+          Open message
+        </button>
+      </article>
+    </div>
+
+    <p id="noMessages" hidden>No messages found.</p>
+
+    <div id="messageDetails" class="panel" hidden>
+      <button id="closeMessage" class="secondary" type="button">Close</button>
+      <h3 id="detailSubject"></h3>
+      <p id="detailSender"></p>
+      <p id="detailEmail" class="muted"></p>
+      <div id="detailBody" class="message-text"></div>
+      <hr>
+      <button id="demoReply" type="button">Reply</button>
+      <p id="replyNotice" class="status-message"></p>
+    </div>
+  </div>
+
+  <div id="sentView" hidden>
+    <h2>Sent messages</h2>
+    <p id="sentCount" class="muted">0 messages</p>
+    <div id="sentMessageList"></div>
+    <p id="noSentMessages">No sent messages yet.</p>
+  </div>
+</section>
+
+<section class="panel">
+  <button id="newMessageButton" type="button">＋ New Message</button>
+
+  <form id="composeForm" hidden>
+    <h2>New message</h2>
+
+    <label for="composeTo">To</label>
+    <input id="composeTo" type="email" required>
+
+    <label for="composeSubject">Subject</label>
+    <input id="composeSubject" type="text" required>
+
+    <label for="composeBody">Message</label>
+    <textarea id="composeBody" required></textarea>
+
+    <button id="sendDemoButton" type="submit">Send demo message</button>
+    <button id="cancelCompose" class="secondary" type="button">Cancel</button>
+    <p id="composeNotice" class="status-message" aria-live="polite"></p>
+  </form>
+</section>
+
+</main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="app.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  const $ = function(id) {
+    return document.getElementById(id);
+  };
+
+  const notificationButton = $("notificationButton");
+  const notificationPanel = $("notificationPanel");
+  const notificationList = $("notificationList");
+  const notificationBadge = $("notificationBadge");
+  const noNotifications = $("noNotifications");
+
+  let currentFilter = "all";
+
+  function getReceivedMessages() {
+    return Array.from(document.querySelectorAll(".message-item"));
+  }
+
+  function getSentMessages() {
+    try {
+      return JSON.parse(
+        localStorage.getItem("supportProDemoSentMessages") || "[]"
+      );
+    } catch(error) {
+      return [];
+    }
+  }
+
+  function saveSentMessages(messages) {
+    localStorage.setItem(
+      "supportProDemoSentMessages",
+      JSON.stringify(messages)
+    );
+  }
+
+  function updateNotifications() {
+    const unreadMessages = getReceivedMessages().filter(function(item) {
+      return item.dataset.status === "unread";
+    });
+
+    notificationList.innerHTML = "";
+    notificationBadge.textContent = unreadMessages.length;
+    notificationBadge.hidden = unreadMessages.length === 0;
+    noNotifications.hidden = unreadMessages.length > 0;
+
+    unreadMessages.forEach(function(item) {
+      const originalButton = item.querySelector(".read-message");
+      if (!originalButton) return;
+
+      const notification = document.createElement("button");
+      notification.type = "button";
+      notification.className = "notification-item unread";
+      notification.textContent =
+        originalButton.dataset.sender + " — " +
+        originalButton.dataset.subject;
+
+      notification.addEventListener("click", function() {
+        notificationPanel.hidden = true;
+        notificationButton.setAttribute("aria-expanded", "false");
+        showTab("inbox");
+        originalButton.click();
+
+        $("messageDetails").scrollIntoView({
+          behavior:"smooth",
+          block:"nearest"
+        });
+      });
+
+      notificationList.appendChild(notification);
+    });
+  }
+
+  notificationButton.addEventListener("click", function(event) {
+    event.stopPropagation();
+
+    notificationPanel.hidden = !notificationPanel.hidden;
+    notificationButton.setAttribute(
+      "aria-expanded",
+      String(!notificationPanel.hidden)
+    );
+  });
+
+  notificationPanel.addEventListener("click", function(event) {
+    event.stopPropagation();
+  });
+
+  document.addEventListener("click", function(event) {
+    if (!event.target.closest(".notification-area")) {
+      notificationPanel.hidden = true;
+      notificationButton.setAttribute("aria-expanded", "false");
+    }
+  });
+
+  function updateDashboard() {
+    const messages = getReceivedMessages();
+    const unread = messages.filter(function(item) {
+      return item.dataset.status === "unread";
+    }).length;
+
+    $("totalReceived").textContent = messages.length;
+    $("totalUnread").textContent = unread;
+    $("totalSent").textContent = getSentMessages().length;
+
+    updateNotifications();
+  }
+
+  function filterMessages() {
+    const search = $("messageSearch").value.toLowerCase().trim();
+    let visible = 0;
+
+    getReceivedMessages().forEach(function(item) {
+      const status = item.dataset.status;
+      const matchesFilter =
+        currentFilter === "all" || status === currentFilter;
+      const matchesSearch =
+        item.textContent.toLowerCase().includes(search);
+
+      const show = matchesFilter && matchesSearch;
+      item.hidden = !show;
+
+      if (show) visible++;
+    });
+
+    $("messageCount").textContent = visible + " message(s)";
+    $("noMessages").hidden = visible !== 0;
+  }
+
+  $("messageSearch").addEventListener("input", filterMessages);
+
+  document.querySelectorAll(".status-filter").forEach(function(button) {
+    button.addEventListener("click", function() {
+      currentFilter = button.dataset.filter;
+
+      document.querySelectorAll(".status-filter").forEach(function(item) {
+        item.classList.toggle("active", item === button);
+      });
+
+      filterMessages();
+    });
+  });
+
+  function showTab(tab) {
+    const showInbox = tab === "inbox";
+
+    $("inboxView").hidden = !showInbox;
+    $("sentView").hidden = showInbox;
+
+    $("inboxTab").classList.toggle("active", showInbox);
+    $("sentTab").classList.toggle("active", !showInbox);
+
+    if (showInbox) {
+      filterMessages();
+    } else {
+      renderSentMessages();
+    }
+  }
+
+  $("inboxTab").addEventListener("click", function() {
+    showTab("inbox");
+  });
+
+  $("sentTab").addEventListener("click", function() {
+    showTab("sent");
+  });
+
+  document.querySelectorAll(".read-message").forEach(function(button) {
+    button.addEventListener("click", function() {
+      const item = button.closest(".message-item");
+
+      item.dataset.status = "read";
+      item.classList.remove("unread");
+
+      $("detailSubject").textContent = button.dataset.subject;
+      $("detailSender").textContent = button.dataset.sender;
+      $("detailEmail").textContent = button.dataset.email;
+      $("detailBody").textContent = button.dataset.body;
+
+      $("messageDetails").hidden = false;
+      $("replyNotice").textContent = "";
+
+      updateDashboard();
+      filterMessages();
+    });
+  });
+
+  $("closeMessage").addEventListener("click", function() {
+    $("messageDetails").hidden = true;
+  });
+
+  $("demoReply").addEventListener("click", function() {
+    $("replyNotice").textContent =
+      "Demo mode: real email replies are not connected yet.";
+  });
+
+  $("newMessageButton").addEventListener("click", function() {
+    $("composeForm").hidden = false;
+    $("composeForm").scrollIntoView({
+      behavior:"smooth",
+      block:"center"
+    });
+  });
+
+  $("cancelCompose").addEventListener("click", function() {
+    $("composeForm").reset();
+    $("composeForm").hidden = true;
+    $("composeNotice").textContent = "";
+  });
+
+  $("composeForm").addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    const message = {
+      id:Date.now(),
+      to:$("composeTo").value.trim(),
+      subject:$("composeSubject").value.trim(),
+      body:$("composeBody").value.trim(),
+      date:new Date().toLocaleString()
+    };
+
+    const messages = getSentMessages();
+    messages.unshift(message);
+    saveSentMessages(messages);
+
+    $("composeForm").reset();
+    $("composeForm").hidden = true;
+
+    $("composeNotice").textContent =
+      "Demo message saved in Sent. No real email was sent.";
+
+    updateDashboard();
+    renderSentMessages();
+  });
+
+  function renderSentMessages() {
+    const sentList = $("sentMessageList");
+    const messages = getSentMessages();
+
+    sentList.innerHTML = "";
+    $("sentCount").textContent = messages.length + " message(s)";
+    $("noSentMessages").hidden = messages.length > 0;
+
+    messages.forEach(function(message) {
+      const item = document.createElement("article");
+      item.className = "sent-item";
+
+      const title = document.createElement("strong");
+      title.textContent = message.subject;
+
+      const recipient = document.createElement("p");
+      recipient.textContent = "To: " + message.to;
+
+      const date = document.createElement("p");
+      date.className = "muted";
+      date.textContent = message.date;
+
+      const actions = document.createElement("div");
+      actions.className = "sent-actions";
+
+      const viewButton = document.createElement("button");
+      viewButton.type = "button";
+      viewButton.textContent = "View sent message";
+
+      const deleteButton = document.createElement("button");
+      deleteButton.type = "button";
+      deleteButton.className = "delete-demo-button";
+      deleteButton.textContent = "Delete";
+
+      viewButton.addEventListener("click", function() {
+        const existing = item.querySelector(".sent-message-body");
+
+        if (existing) {
+          existing.remove();
+          return;
+        }
+
+        const body = document.createElement("p");
+        body.className = "message-text sent-message-body";
+        body.textContent = message.body;
+        item.appendChild(body);
+      });
+
+      deleteButton.addEventListener("click", function() {
+        if (!confirm("Delete this demo message?")) return;
+
+        const updated = getSentMessages().filter(function(entry) {
+          return entry.id !== message.id;
+        });
+
+        saveSentMessages(updated);
+        renderSentMessages();
+        updateDashboard();
+      });
+
+      actions.appendChild(viewButton);
+      actions.appendChild(deleteButton);
+
+      item.appendChild(title);
+      item.appendChild(recipient);
+      item.appendChild(date);
+      item.appendChild(actions);
+
+      sentList.appendChild(item);
+    });
+  }
+
+  // Initialisation
+  filterMessages();
+  renderSentMessages();
+  updateDashboard();
+
+});
+</script>
+
+</body>
+</html>

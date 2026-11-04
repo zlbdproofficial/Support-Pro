@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#030a1f">
+<title>Postea</title>
+<style>
+html,body{height:100%;margin:0;background:#02060f}
+#app{position:relative;max-width:430px;height:100%;margin:auto;overflow:hidden;background:#030a1f}
+iframe{position:absolute;left:0;top:env(safe-area-inset-top,0px);bottom:env(safe-area-inset-bottom,0px);width:100%;height:calc(100% - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));border:0;visibility:hidden;opacity:0;transition:opacity .25s}
+iframe.on{visibility:visible;opacity:1}
+@media(min-width:431px){#app{border:2px solid #2457ff;border-radius:34px;box-shadow:0 0 30px rgba(31,123,255,.6);height:calc(100% - 24px);margin-top:12px}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
+</head>
+<body>
+<div id="app"></div>
+<script>
+var SB_URL='https://lyykydpgabevqtodlwoq.supabase.co',SB_KEY='sb_publishable_JDG1j8DEyplF3jwqM-2MPg_yPbGynl8',SB=null;
+try{SB=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})}catch(e){}
+var SITE='https://zlbdproofficial.github.io/Support-Pro/';
+var APP_PKG='com.zlbdpro.postea';
+var IN_APP=location.href.indexOf(SITE)!==0||/; wv\)/.test(navigator.userAgent);
+var REDIR=IN_APP?SITE:location.origin+location.pathname;
+var GSC='https://www.googleapis.com/auth/gmail.readonly';
+function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){}return null}
+function gTok(){try{var o=JSON.parse(ls('gtok')||'null');if(o&&o.exp>Date.now())return o.t}catch(e){}return null}
+function gSave(t){if(t)ls('gtok',JSON.stringify({t:t,exp:Date.now()+3300000}))}
+function rnd(){var a=new Uint8Array(24);crypto.getRandomValues(a);return Array.prototype.map.call(a,function(x){return('0'+x.toString(16)).slice(-2)}).join('')}
+function sync(s){try{if(s&&s.user){var u=s.user,m=u.user_metadata||{};ls('mail',u.email||'');if(m.full_name)ls('un',m.full_name);if(m.company)ls('co',m.company)}
+if(s&&s.provider_token&&ls('gmail_want')&&!ls('app_login')){gSave(s.provider_token);ls('gmail_want',null)}}catch(e){}}
+function clr(){['mail','un','co','cm','logo','team','ev','chan','gtok','gmail_want'].forEach(function(k){ls(k,null)})}
+function oauth(gm,nonce){var o={redirectTo:nonce?SITE+'?app_login='+nonce+(gm?'&gmail=1':''):REDIR};if(gm){o.scopes=GSC;o.queryParams={prompt:'consent'}}return SB.auth.signInWithOAuth({provider:'google',options:o})}
+function waitHandoff(nonce){return new Promise(function(res){var t0=Date.now(),busy=false,iv;
+function end(o){clearInterval(iv);document.removeEventListener('visibilitychange',vis);removeEventListener('focus',poll);res(o)}
+function poll(){if(busy)return;busy=true;SB.rpc('claim_handoff',{p_nonce:nonce}).then(function(r){busy=false;var row=r.data&&r.data[0];
+if(row){SB.auth.setSession({access_token:row.out_access,refresh_token:row.out_refresh}).then(function(s){if(s.error)return end({ok:false,error:s.error.message});sync(s.data.session);if(row.out_gtoken)gSave(row.out_gtoken);ls('pending_nonce',null);end({ok:true,session:true,gmail:!!row.out_gtoken})})}
+else if(Date.now()-t0>300000)end({ok:false,error:'Délai dépassé. Réessayez.'})}).catch(function(){busy=false})}
+function vis(){if(!document.hidden)poll()}
+iv=setInterval(poll,2500);document.addEventListener('visibilitychange',vis);addEventListener('focus',poll)})}
+/* ---- côté navigateur : on dépose la session pour l'application ---- */
+(function(){if(IN_APP||!SB)return;
+function veil(t,t2,btn){var d=document.getElementById('veil');if(!d){d=document.createElement('div');d.id='veil';d.style.cssText='position:fixed;inset:0;z-index:99999;background:#030a1f;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:system-ui,sans-serif;text-align:center;padding:28px;gap:14px';document.body.appendChild(d)}
+d.innerHTML='';var a=document.createElement('div');a.style.cssText='font-size:22px;font-weight:700';a.textContent=t;d.appendChild(a);
+if(t2){var c=document.createElement('div');c.style.cssText='font-size:15px;color:#9db4e6';c.textContent=t2;d.appendChild(c)}
+if(btn){var b=document.createElement('a');b.href='intent://zlbdproofficial.github.io/Support-Pro/?done=1#Intent;scheme=https;package='+APP_PKG+';S.browser_fallback_url='+encodeURIComponent(SITE+'?done=1')+';end';b.textContent='Ouvrir Postea / Open Postea';b.style.cssText='margin-top:8px;padding:14px 28px;border-radius:14px;background:linear-gradient(90deg,#0a62ff,#2fa8ff);color:#fff;font-weight:700;font-size:17px;text-decoration:none;box-shadow:0 0 18px #1f7bff';d.appendChild(b)}}
+function finish(){var nn=ls('app_login');if(!nn)return;
+SB.auth.getSession().then(function(r){var s=r.data&&r.data.session;if(!s)return;var gt=(ls('gmail_want')&&s.provider_token)||null;
+SB.rpc('store_handoff',{p_nonce:nn,p_access:s.access_token,p_refresh:s.refresh_token,p_gtoken:gt}).then(function(x){ls('app_login',null);ls('gmail_want',null);
+if(x.error){veil('Erreur / Error',x.error.message);return}
+SB.auth.signOut({scope:'local'}).then(function(){veil('Connexion réussie ✔ / Signed in ✔','Retournez dans l’application Postea. / Go back to the Postea app.',true)})})})}
+if(/[?&]done=1/.test(location.search)){veil('Connexion réussie ✔ / Signed in ✔','Ouvrez l’application Postea depuis vos applications récentes. / Open the Postea app from your recent apps.');return}
+var n=null,gm=false,ret=/access_token=|[?&]code=|[#&]error=/.test(location.hash+location.search);try{var qs=new URLSearchParams(location.search);n=qs.get('app_login');gm=qs.get('gmail')=='1'}catch(x){}
+function fin(){veil('Finalisation… / Finishing…');setTimeout(finish,600);SB.auth.onAuthStateChange(function(ev){if(ev=='SIGNED_IN')setTimeout(finish,300)});setTimeout(function(){if(ls('app_login'))veil('Erreur / Error','Fermez cette page et réessayez. / Close this page and try again.')},25000)}
+if(n&&/^[0-9a-f]{32,64}$/.test(n)){ls('app_login',n);if(gm)ls('gmail_want','1');try{history.replaceState(null,'',location.pathname+location.hash)}catch(x){}
+if(ret)fin();else{veil('Redirection vers Google… / Redirecting to Google…');SB.auth.getSession().then(function(r){if(r.data&&r.data.session&&!gm)finish();else oauth(gm)})}}
+else if(ls('app_login'))fin()})();
+/* ---- application : reprise si la page a été rechargée pendant la connexion ---- */
+(function(){if(!IN_APP||!SB)return;var pn=(ls('pending_nonce')||'').split('|');
+if(pn[0]&&pn[1]&&Date.now()-(+pn[1])<300000)waitHandoff(pn[0]).then(function(r){if(r.ok)location.reload()})})();
+/* ---- Gmail (lecture seule) ---- */
+function gfetch(path){var t=gTok();if(!t)return Promise.reject({auth:1});
+return fetch('https://gmail.googleapis.com/gmail/v1/users/me/'+path,{headers:{Authorization:'Bearer '+t}}).then(function(r){if(r.status==401||r.status==403){ls('gtok',null);throw{auth:1}}if(!r.ok)throw{msg:'HTTP '+r.status};return r.json()})}
+function hdr(m,n){var h=(m.payload&&m.payload.headers)||[];for(var i=0;i<h.length;i++)if(h[i].name.toLowerCase()==n)return h[i].value;return ''}
+function fromName(s){var m=/^\s*"?([^"<]*?)"?\s*<([^>]+)>/.exec(s||'');return(m&&m[1].trim())||(m&&m[2])||s||''}
+function femail(s){var m=/<([^>\s]+@[^>\s]+)>/.exec(s||'')||/([^\s<>"']+@[^\s<>"']+)/.exec(s||'');return m?m[1]:''}
+function dec(s){var t=document.createElement('textarea');t.innerHTML=s||'';return t.value}
+function tlabel(ms){var d=new Date(ms),n=new Date();if(d.toDateString()==n.toDateString())return('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);return('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)}
+function b64(s){s=s.replace(/-/g,'+').replace(/_/g,'/');try{return decodeURIComponent(escape(atob(s)))}catch(e){try{return atob(s)}catch(x){return ''}}}
+function findPart(p,mt){if(!p)return null;if(p.mimeType==mt&&p.body&&p.body.data)return p.body.data;var ps=p.parts||[];for(var i=0;i<ps.length;i++){var r=findPart(ps[i],mt);if(r)return r}return null}
+function bodyOf(p){var t=findPart(p,'text/plain');if(t)return b64(t).slice(0,12000);
+var h=findPart(p,'text/html');if(h){var d=new DOMParser().parseFromString(b64(h),'text/html');d.querySelectorAll('style,script').forEach(function(e){e.remove()});return(d.body.textContent||'').replace(/\n\s*\n\s*\n+/g,'\n\n').trim().slice(0,12000)}return ''}
+addEventListener('message',function(e){var d=e.data;if(!d||d.type!='auth')return;
+function rep(o){o.type='authres';o.id=d.id;try{e.source.postMessage(o,'*')}catch(x){}}
+if(!SB)return rep({ok:false,error:'Service indisponible'});
+var p=d.payload||{},a=d.action,q;
+try{
+if(a=='session')q=SB.auth.getSession().then(function(r){var s=r.data&&r.data.session;sync(s);rep({ok:true,session:!!s})});
+else if(a=='signin')q=SB.auth.signInWithPassword({email:p.email,password:p.password}).then(function(r){if(r.error)return rep({ok:false,error:r.error.message});sync(r.data.session);rep({ok:true,session:true})});
+else if(a=='signup')q=SB.auth.signUp({email:p.email,password:p.password,options:{data:{full_name:p.name,company:p.company},emailRedirectTo:REDIR}}).then(function(r){
+if(r.error)return rep({ok:false,error:r.error.message});
+if(r.data.user&&r.data.user.identities&&r.data.user.identities.length===0)return rep({ok:false,error:'User already registered'});
+sync(r.data.session);if(p.name)ls('un',p.name);if(p.company)ls('co',p.company);ls('mail',p.email);
+rep({ok:true,session:!!r.data.session})});
+else if(a=='google'){if(!IN_APP)q=oauth(false).then(function(r){rep({ok:!r.error,error:r.error&&r.error.message})});
+else{var nonce=rnd();ls('pending_nonce',nonce+'|'+Date.now());q=waitHandoff(nonce).then(rep);setTimeout(function(){oauth(false,nonce)},150)}}
+else if(a=='gmail_connect'){if(!IN_APP){ls('gmail_want','1');q=oauth(true).then(function(r){rep({ok:!r.error,error:r.error&&r.error.message})})}
+else{var n2=rnd();ls('pending_nonce',n2+'|'+Date.now());q=waitHandoff(n2).then(rep);setTimeout(function(){oauth(true,n2)},150)}}
+else if(a=='gmail_status')rep({ok:true,connected:!!gTok()});
+else if(a=='gmail_list')q=gfetch('messages?maxResults=20&labelIds=INBOX').then(function(l){return Promise.all((l.messages||[]).map(function(x){return gfetch('messages/'+x.id+'?format=metadata&metadataHeaders=From&metadataHeaders=Subject')}))}).then(function(ms){
+rep({ok:true,items:ms.map(function(m){return{id:m.id,from:fromName(hdr(m,'from')),email:femail(hdr(m,'from')),subject:hdr(m,'subject'),snippet:dec(m.snippet),t:tlabel(+m.internalDate),unread:(m.labelIds||[]).indexOf('UNREAD')>-1}})})}).catch(function(x){rep({ok:false,auth:!!(x&&x.auth),error:(x&&x.msg)||'gmail'})});
+else if(a=='gmail_get')q=gfetch('messages/'+encodeURIComponent(p.id)+'?format=full').then(function(m){rep({ok:true,body:bodyOf(m.payload)||dec(m.snippet)})}).catch(function(x){rep({ok:false,auth:!!(x&&x.auth),error:(x&&x.msg)||'gmail'})});
+else if(a=='user')q=SB.auth.getUser().then(function(r){var u=r.data&&r.data.user;rep({ok:!!u,email:u&&u.email,provider:u&&u.app_metadata&&u.app_metadata.provider})});
+else if(a=='setpw')q=SB.auth.updateUser({password:p.password}).then(function(r){rep({ok:!r.error,error:r.error&&r.error.message})});
+else if(a=='signout_all')q=SB.auth.signOut({scope:'global'}).then(function(){clr();rep({ok:true})});
+else if(a=='reset')q=SB.auth.resetPasswordForEmail(p.email,{redirectTo:REDIR}).then(function(r){rep({ok:!r.error,error:r.error&&r.error.message})});
+else if(a=='update')q=SB.auth.updateUser({data:{company:p.company}}).then(function(r){rep({ok:!r.error,error:r.error&&r.error.message})});
+else if(a=='signout')q=SB.auth.signOut().then(function(){clr();rep({ok:true})});
+else rep({ok:false,error:'Action inconnue'});
+if(q&&q.catch)q.catch(function(x){rep({ok:false,error:String(x&&x.message||x)})});
+}catch(x){rep({ok:false,error:String(x.message||x)})}});
+if(SB)SB.auth.onAuthStateChange(function(ev,s){sync(s);
+if(ev=='PASSWORD_RECOVERY')setTimeout(function(){var np=prompt('Entrez votre nouveau mot de passe (6 caractères minimum) :');
+if(np&&np.length>=6)SB.auth.updateUser({password:np}).then(function(r){alert(r.error?r.error.message:'Mot de passe mis à jour.')})},800)});
+</script>
+<script>
+var S={"splash": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\">\n<meta name=\"theme-color\" content=\"#030a1f\">\n<title>Postea \u2013 \u00c9cran 1<\/title>\n<style>:root{--ac:#1f7bff;--ac2:#5aa8ff;--bgA:#030a1f;--bgB:#04123a;--cb:rgba(10,30,90,.5);--tx:#fff;--mu:#9db4e6;--navbg:rgba(5,15,50,.85);--sheet:#06164a}:root[data-theme=light]{--bgA:#eef3ff;--bgB:#dde7ff;--cb:#fff;--tx:#0a1a3f;--mu:#52669b;--navbg:rgba(255,255,255,.92);--sheet:#fff}@media(prefers-color-scheme:light){:root[data-theme=auto]{--bgA:#eef3ff;--bgB:#dde7ff;--cb:#fff;--tx:#0a1a3f;--mu:#52669b;--navbg:rgba(255,255,255,.92);--sheet:#fff}}button{color:inherit}.sb{display:none!important}.mod .gl,.mod .m,.mod .e,.mod .co,.mod .ls,.mod .pv,.mod .cal{border-radius:22px!important;box-shadow:0 8px 22px rgba(0,0,0,.28)!important;border-width:1px!important}<\/style>\n<style>\n:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}\n*{box-sizing:border-box}\nhtml,body{height:100%;margin:0;background:#02060f;color:var(--tx);font-family:system-ui,Arial,sans-serif}\n#ph{position:relative;max-width:430px;height:100%;margin:auto;overflow:hidden;\nbackground:\nurl(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 430 900' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' x2='1'%3E%3Cstop offset='0' stop-color='%2300c6ff' stop-opacity='0'/%3E%3Cstop offset='.5' stop-color='%232f7bff'/%3E%3Cstop offset='1' stop-color='%2300c6ff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg fill='none' stroke='url(%23g)' stroke-width='2.5'%3E%3Cpath d='M-20 640 C100 560 230 780 450 560'/%3E%3Cpath d='M-20 680 C120 600 250 820 450 610' opacity='.6'/%3E%3Cpath d='M-20 720 C140 650 270 860 450 670' opacity='.4'/%3E%3Cpath d='M-20 790 C150 720 300 900 450 740' opacity='.3'/%3E%3C/g%3E%3C/svg%3E\") center/100% 100% no-repeat,\nradial-gradient(circle at 50% 38%,color-mix(in srgb,var(--ac) 45%,transparent),transparent 55%),\nlinear-gradient(var(--bgA),var(--bgB) 60%,var(--bgA))}\n.map{position:absolute;inset:0 0 40% 0;opacity:.5;background:radial-gradient(circle,#4f9bff 1.3px,transparent 1.6px) 0 0/9px 9px;\n-webkit-mask-image:radial-gradient(ellipse 60% 40% at 30% 35%,#000 40%,transparent 75%),radial-gradient(ellipse 45% 45% at 78% 55%,#000 30%,transparent 70%);\n-webkit-mask-composite:source-over;mask-image:radial-gradient(ellipse 60% 40% at 30% 35%,#000 40%,transparent 75%),radial-gradient(ellipse 45% 45% at 78% 55%,#000 30%,transparent 70%)}\n.sb{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:22px;right:22px;display:flex;justify-content:space-between;font-weight:600;font-size:14px;z-index:2}\n.sb span:last-child{letter-spacing:2px}\n.c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 24px 40px}\n.env{width:290px;height:224px;filter:drop-shadow(0 0 20px var(--ac)) drop-shadow(0 12px 30px color-mix(in srgb,var(--ac) 65%,transparent));animation:fl 4s ease-in-out infinite}@keyframes fl{50%{transform:translateY(-8px)}}\nh1{margin:4px 0 12px;font-size:48px;font-weight:700;letter-spacing:-1px;text-shadow:0 0 24px color-mix(in srgb,var(--ac) 70%,transparent)}\nh1 i{background:linear-gradient(90deg,var(--ac),var(--ac2));-webkit-background-clip:text;background-clip:text;color:transparent;font-style:italic;text-shadow:none;filter:drop-shadow(0 0 12px color-mix(in srgb,var(--ac) 80%,transparent))}\np{margin:0;font-size:17px;line-height:1.45;color:var(--mu);letter-spacing:.3px;text-shadow:0 0 8px rgba(0,0,0,.6)}\n.fl{display:flex;gap:14px;margin-top:22px}\n.fl div{width:50px;height:50px;border-radius:50%;border:2px solid rgba(207,227,255,.9);overflow:hidden;box-shadow:0 0 16px color-mix(in srgb,var(--ac) 80%,transparent),inset 0 0 10px rgba(0,0,0,.45);display:grid;place-items:center}\n.fr{background:linear-gradient(90deg,#1b3ea8 33%,#fff 33% 66%,#e1262c 66%)}\n.ar{background:#1a8f3c;font-size:20px;font-weight:700;color:#fff}\n.fl svg{width:100%;height:100%;display:block}\n.sp{position:absolute;bottom:calc(52px + env(safe-area-inset-bottom,0px));left:50%;margin-left:-16px;width:32px;height:32px;border-radius:50%;border:3px solid color-mix(in srgb,var(--ac) 25%,transparent);border-top-color:var(--ac2);box-shadow:0 0 12px var(--ac);animation:r 1s linear infinite}\n@keyframes r{to{transform:rotate(360deg)}}\n.wm{position:absolute;top:calc(50% - 113px);left:-25%;width:150%;height:auto;transform:translateY(-50%);opacity:.9;filter:drop-shadow(0 0 5px var(--ac));-webkit-mask-image:radial-gradient(ellipse 50% 50% at 50% 50%,#000 50%,transparent 100%);mask-image:radial-gradient(ellipse 50% 50% at 50% 50%,#000 50%,transparent 100%)}\n.ln{width:70px;height:3px;border-radius:3px;margin:0 0 14px;background:linear-gradient(90deg,transparent,var(--ac2),transparent);box-shadow:0 0 12px var(--ac2)}\n.ld{position:absolute;bottom:calc(22px + env(safe-area-inset-bottom,0px));width:100%;text-align:center;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#7fa6e6}\n.tg{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:2px}\n.tl{display:inline-block;white-space:nowrap;opacity:0;text-shadow:0 0 16px color-mix(in srgb,var(--ac) 75%,transparent);animation:wr 1.4s ease-out forwards}\n.fr,.en{font-family:'Dancing Script','Segoe Script','Brush Script MT',cursive;font-weight:600;line-height:1.15}\n.fr{font-size:31px;color:var(--tx);animation-delay:.3s}\n.en{font-size:24px;color:#9fd2ff;animation-delay:1.6s}\n.ar{font-family:'Aref Ruqaa','Amiri','Noto Naskh Arabic',serif;font-weight:700;font-size:25px;line-height:1.6;color:#9fd2ff;animation-name:wrr;animation-delay:2.9s}\n@keyframes wr{from{opacity:1;clip-path:inset(0 100% 0 0)}to{opacity:1;clip-path:inset(0 0 0 0)}}\n@keyframes wrr{from{opacity:1;clip-path:inset(0 0 0 100%)}to{opacity:1;clip-path:inset(0 0 0 0)}}\n@media(max-height:760px){.env{width:220px;height:170px}.fr{font-size:27px}.en{font-size:21px}.ar{font-size:22px}.fl{margin-top:14px}}\n@media(max-height:660px){.fl{display:none}}\n@media(prefers-reduced-motion:reduce){.tl{animation-duration:.01s;animation-delay:0s}}\n.tg3{display:grid;margin-top:8px;min-height:56px;align-items:center;justify-items:center}\n.t3l{grid-area:1/1;white-space:nowrap;opacity:0;text-align:center;text-shadow:0 0 16px color-mix(in srgb,var(--ac) 80%,transparent);animation:cy3 6s infinite;font-size:clamp(20px,5.8vw,27px)}\n.g1,.g2{font-family:'Dancing Script','Segoe Script','Brush Script MT',cursive;font-weight:600}\n.g1{color:var(--tx)}.g2{color:#9fd2ff;animation-delay:2s}\n.g3{font-family:'Aref Ruqaa','Amiri','Noto Naskh Arabic',serif;font-weight:700;color:#9fd2ff;animation-name:cy3r;animation-delay:4s}\n@keyframes cy3{0%{opacity:1;clip-path:inset(0 100% 0 0)}15%,30%{opacity:1;clip-path:inset(0 0 0 0)}33%,100%{opacity:0;clip-path:inset(0 0 0 0)}}\n@keyframes cy3r{0%{opacity:1;clip-path:inset(0 0 0 100%)}15%,30%{opacity:1;clip-path:inset(0 0 0 0)}33%,100%{opacity:0;clip-path:inset(0 0 0 0)}}\n@media(prefers-reduced-motion:reduce){.t3l{animation:none}.g1{opacity:1}}\n@media(min-width:431px){#ph{border:2px solid var(--ac);border-radius:34px;box-shadow:0 0 30px color-mix(in srgb,var(--ac) 60%,transparent);height:calc(100% - 24px);margin-top:12px}}\n<\/style>\n<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\"><link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n<link href=\"https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Aref+Ruqaa:wght@700&display=swap\" rel=\"st

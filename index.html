@@ -29,9 +29,19 @@ function gTok(){try{var o=JSON.parse(ls('gtok')||'null');if(o&&o.exp>Date.now())
 function gSave(t){if(t)ls('gtok',JSON.stringify({t:t,exp:Date.now()+3300000}))}
 function rnd(){var a=new Uint8Array(24);crypto.getRandomValues(a);return Array.prototype.map.call(a,function(x){return('0'+x.toString(16)).slice(-2)}).join('')}
 function sync(s){try{if(s&&s.user)startSync(s.user.id);else stopSync();if(s&&s.user){var u=s.user,m=u.user_metadata||{};ls('mail',u.email||'');if(m.full_name)ls('un',m.full_name);if(m.company)ls('co',m.company)}
-if(s&&s.provider_token&&ls('gmail_want')&&!ls('app_login')){gSave(s.provider_token);ls('gmail_want',null)}}catch(e){}}
+if(s&&s.provider_token&&ls('gmail_want')&&!ls('app_login')){gSave(s.provider_token);ls('gmail_want',null)}if(s&&s.user)pushInit()}catch(e){}}
 function dropLocal(){try{SB.auth.stopAutoRefresh()}catch(e){}try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('sb-')===0)localStorage.removeItem(k)})}catch(e){}return Promise.resolve()}
-function clr(){['mail','un','co','cm','logo','team','ev','chan','gtok','gmail_want'].forEach(function(k){ls(k,null)})}
+function clr(){['mail','un','co','cm','logo','team','ev','chan','gtok','gmail_want','push_tok'].forEach(function(k){ls(k,null)})}
+/* ---- Notifications push : actives seulement dans l'application Android (Capacitor + Firebase) ---- */
+var PUSH_STATE={on:false};
+function pushPlugin(){try{var C=window.Capacitor;if(C&&C.isNativePlatform&&C.isNativePlatform()&&C.Plugins&&C.Plugins.PushNotifications)return C.Plugins.PushNotifications}catch(e){}return null}
+function pushInit(){var P=pushPlugin();if(!P||PUSH_STATE.on||!SB)return;PUSH_STATE.on=true;
+try{P.addListener('registration',function(t){var tok=t&&t.value;if(!tok)return;ls('push_tok',tok);Promise.resolve(SB.rpc('register_push_token',{p_token:tok})).then(function(){},function(){})});
+P.addListener('registrationError',function(){PUSH_STATE.on=false});
+try{P.createChannel({id:'messages',name:'Messages',description:'Nouveaux messages de vos clients',importance:5,visibility:1,vibration:true})}catch(e){}
+P.checkPermissions().then(function(p){return p&&p.receive==='granted'?p:P.requestPermissions()}).then(function(p){if(p&&p.receive==='granted')return P.register();PUSH_STATE.on=false}).catch(function(){PUSH_STATE.on=false})}catch(e){PUSH_STATE.on=false}}
+function pushOff(){var tok=ls('push_tok');PUSH_STATE.on=false;if(!tok)return Promise.resolve();ls('push_tok',null);
+return Promise.resolve(SB&&SB.rpc('unregister_push_token',{p_token:tok})).then(function(){},function(){})}
 /* ==SYNC-START== sauvegarde : miroir des données locales dans Supabase (table user_data) */
 var SYNC_KEYS=['co','cm','logo','team','ev','chan','theme','ac','style','lang'],SYNC_UID=null,SYNC_READY=false,SYNC_LAST='',SYNC_BUSY=false,SYNC_NEXT=0,SYNC_TIMER=null;
 function syncSnap(){var o={};SYNC_KEYS.forEach(function(k){var v=ls(k);if(typeof v==='string'&&v!=='')o[k]=v});return o}
@@ -173,10 +183,10 @@ else if(a=='wa_list')q=waList().then(rep);
 else if(a=='wa_thread')q=waThread(p.wa_id).then(rep);
 else if(a=='user')q=SB.auth.getUser().then(function(r){var u=r.data&&r.data.user;rep({ok:!!u,email:u&&u.email,provider:u&&u.app_metadata&&u.app_metadata.provider})});
 else if(a=='setpw')q=SB.auth.updateUser({password:p.password}).then(function(r){rep({ok:!r.error,error:r.error&&r.error.message})});
-else if(a=='signout_all')q=syncFlush().then(function(){stopSync();return SB.auth.signOut({scope:'global'})}).then(function(){clr();rep({ok:true})});
+else if(a=='signout_all')q=pushOff().then(function(){return syncFlush()}).then(function(){stopSync();return SB.auth.signOut({scope:'global'})}).then(function(){clr();rep({ok:true})});
 else if(a=='reset')q=SB.auth.resetPasswordForEmail(p.email,{redirectTo:REDIR}).then(function(r){rep({ok:!r.error,error:r.error&&r.error.message})});
 else if(a=='update')q=SB.auth.updateUser({data:{company:p.company}}).then(function(r){rep({ok:!r.error,error:r.error&&r.error.message})});
-else if(a=='signout')q=syncFlush().then(function(){stopSync();return SB.auth.signOut()}).then(function(){clr();rep({ok:true})});
+else if(a=='signout')q=pushOff().then(function(){return syncFlush()}).then(function(){stopSync();return SB.auth.signOut()}).then(function(){clr();rep({ok:true})});
 else rep({ok:false,error:'Action inconnue'});
 if(q&&q.catch)q.catch(function(x){rep({ok:false,error:String(x&&x.message||x)})});
 }catch(x){rep({ok:false,error:String(x.message||x)})}});

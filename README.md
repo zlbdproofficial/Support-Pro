@@ -1,6 +1,6 @@
 # Support-Pro (Postea)
 
-Application de support professionnel multi-canaux : Gmail, WhatsApp Business, Telegram et chat web.
+Application de support professionnel multi-canaux : Gmail, Telegram et chat web (WhatsApp Business est masqué : son code est conservé et se réactive en une modification).
 
 - `index.html` : l'application (publiée par GitHub Pages)
 - `chat.html` : page de chat vue par vos visiteurs (lien à partager ou bulle sur votre site)

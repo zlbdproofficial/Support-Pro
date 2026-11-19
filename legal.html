@@ -10,9 +10,13 @@ main{max-width:760px;margin:auto;padding:24px 18px 60px}
 h1{font-size:28px;margin:8px 0 4px}h2{margin-top:34px;color:#5aa8ff;border-bottom:1px solid #1b3a8a;padding-bottom:6px}h3{margin-top:22px}
 a{color:#7fd6ff}small,.mu{color:#9db4e6}
 nav a{margin-right:14px}
+.back{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:8px;margin:-24px -18px 12px;padding:14px 18px;background:#030a1fee;border-bottom:1px solid #1b3a8a;color:#e6eeff;font:600 16px system-ui,Arial,sans-serif;text-decoration:none;cursor:pointer}
+.back svg{width:22px;height:22px;fill:none;stroke:#e6eeff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 </style>
 </head>
 <body><main>
+<a class="back" id="back" href="index.html" aria-label="Retour / Back"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 5l-7 7 7 7"/></svg>Retour / Back</a>
+<script>document.getElementById("back").addEventListener("click",function(e){if(history.length>1){e.preventDefault();history.back()}})</script>
 <h1>Postea</h1>
 <p class="mu">Dernière mise à jour / Last updated : 2026</p>
 <nav><a href="#privacy">Confidentialité</a><a href="#terms">Conditions</a><a href="#privacy-en">Privacy (EN)</a><a href="#terms-en">Terms (EN)</a></nav>

@@ -164,8 +164,8 @@ if(r.error)return rep({ok:false,error:r.error.message});
 if(r.data.user&&r.data.user.identities&&r.data.user.identities.length===0)return rep({ok:false,error:'User already registered'});
 sync(r.data.session);if(p.name)ls('un',p.name);if(p.company)ls('co',p.company);ls('mail',p.email);
 rep({ok:true,session:!!r.data.session})});
-else if(a=='google'){if(!IN_APP)q=oauth(false).then(function(r){rep({ok:!r.error,error:r.error&&r.error.message})});
-else{var nonce=rnd();ls('pending_nonce',nonce+'|'+Date.now());q=waitHandoff(nonce).then(rep);setTimeout(function(){oauth(false,nonce)},150)}}
+else if(a=='google'){/* une seule connexion Google : on demande aussi Gmail (lecture seule) */if(!IN_APP){ls('gmail_want','1');q=oauth(true).then(function(r){if(r.error)ls('gmail_want',null);rep({ok:!r.error,error:r.error&&r.error.message})})}
+else{var nonce=rnd();ls('pending_nonce',nonce+'|'+Date.now());q=waitHandoff(nonce).then(rep);setTimeout(function(){oauth(true,nonce)},150)}}
 else if(a=='gmail_connect'){if(!IN_APP){ls('gmail_want','1');q=oauth(true).then(function(r){rep({ok:!r.error,error:r.error&&r.error.message})})}
 else{var n2=rnd();ls('pending_nonce',n2+'|'+Date.now());q=waitHandoff(n2).then(rep);setTimeout(function(){oauth(true,n2)},150)}}
 else if(a=='gmail_status')rep({ok:true,connected:!!gTok()});

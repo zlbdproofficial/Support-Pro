@@ -41,8 +41,9 @@ function clr(){['mail','un','co','cm','logo','team','ev','chan','gtok','gmail_wa
 var PUSH_STATE={on:false};
 function pushPlugin(){try{var C=window.Capacitor;if(C&&C.isNativePlatform&&C.isNativePlatform()&&C.Plugins&&C.Plugins.PushNotifications)return C.Plugins.PushNotifications}catch(e){}return null}
 function pushInit(){var P=pushPlugin();if(!P||PUSH_STATE.on||!SB)return;PUSH_STATE.on=true;
-try{P.addListener('registration',function(t){var tok=t&&t.value;if(!tok)return;ls('push_tok',tok);Promise.resolve(SB.rpc('register_push_token',{p_token:tok})).then(function(){},function(){})});
-P.addListener('registrationError',function(){PUSH_STATE.on=false});
+try{if(!PUSH_STATE.ls){PUSH_STATE.ls=true;/* écoutes ajoutées une seule fois (pas de doublon après déconnexion/reconnexion) */
+P.addListener('registration',function(t){var tok=t&&t.value;if(!tok)return;ls('push_tok',tok);Promise.resolve(SB.rpc('register_push_token',{p_token:tok})).then(function(){},function(){})});
+P.addListener('registrationError',function(){PUSH_STATE.on=false})}
 try{P.createChannel({id:'messages',name:'Messages',description:'Nouveaux messages de vos clients',importance:5,visibility:1,vibration:true})}catch(e){}
 P.checkPermissions().then(function(p){return p&&p.receive==='granted'?p:P.requestPermissions()}).then(function(p){if(p&&p.receive==='granted')return P.register();PUSH_STATE.on=false}).catch(function(){PUSH_STATE.on=false})}catch(e){PUSH_STATE.on=false}}
 function pushOff(){var tok=ls('push_tok');PUSH_STATE.on=false;if(!tok)return Promise.resolve();ls('push_tok',null);
